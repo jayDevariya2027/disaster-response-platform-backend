@@ -29,11 +29,13 @@ const initializeSocketIO = (server) => {
   });
 };
 
-const disasterRoutes = require('./src/routes/disasterRoutes');
+const disasterRoutes = require("./src/routes/disasterRoutes");
+const geocodeRoutes = require("./src/routes/geocodeRoutes");
 
 // Routes
 app.get("/", (req, res) => res.send("Disaster Response API is live"));
-app.use('/disasters', disasterRoutes);
+app.use("/disasters", disasterRoutes);
+app.use("/geocode", geocodeRoutes);
 
 const startApp = async () => {
   const server = http.createServer(app);

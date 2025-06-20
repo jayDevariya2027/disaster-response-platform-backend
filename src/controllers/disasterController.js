@@ -1,3 +1,4 @@
+const { getLocationFromDescription } = require("../utils/geocode");
 const supabase = require("../utils/supabase");
 
 // Helper to build audit logs
@@ -9,20 +10,24 @@ const createAuditTrail = (action, userId) => ({
 
 const createDisaster = async (req, res) => {
   try {
-    const { title, location_name, location, description, tags } = req.body;
+    const { title, description, tags } = req.body;
     const owner_id = req.user.id;
 
     const audit_trail = [createAuditTrail("create", owner_id)];
+
+    const { location_name, location } = await getLocationFromDescription(
+      description
+    );
 
     const { data, error } = await supabase
       .from("disasters")
       .insert([
         {
           title,
-          location_name,
-          location,
           description,
           tags,
+          location_name,
+          location,
           owner_id,
           audit_trail,
         },
