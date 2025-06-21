@@ -119,5 +119,6 @@ const getLocationFromDescription = async (description) => {
 };
 
 module.exports = {
+  geocodeLocation,
   getLocationFromDescription,
 };

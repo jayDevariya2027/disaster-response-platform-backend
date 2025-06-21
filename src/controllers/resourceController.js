@@ -1,14 +1,16 @@
+const { geocodeLocation } = require("../utils/geocode");
 const supabase = require("../utils/supabase");
 
 const createResource = async (req, res) => {
   try {
-    const { disaster_id, name, location_name, lat, lng, type } = req.body;
+    const { disaster_id, name, location_name, type } = req.body;
 
-    if (!disaster_id || !name || !lat || !lng || !type) {
+    if (!disaster_id || !name || !location_name || !type) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    const location = `SRID=4326;POINT(${lng} ${lat})`;
+    const coordinates = await geocodeLocation(location_name);
+    const location = `SRID=4326;POINT(${coordinates.lng} ${coordinates.lat})`;
 
     const { data, error } = await supabase
       .from("resources")
@@ -29,7 +31,7 @@ const createResource = async (req, res) => {
 const getNearbyResources = async (req, res) => {
   try {
     const { id: disaster_id } = req.params;
-    const { geometry } = req.query; 
+    const { geometry } = req.query;
 
     if (!geometry) {
       return res.status(400).json({ error: "geometry parameter required" });
