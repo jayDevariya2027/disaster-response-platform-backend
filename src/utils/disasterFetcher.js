@@ -19,7 +19,7 @@ const getCachedDisasterById = async (disaster_id) => {
   // Fetch from DB
   const { data: disaster, error } = await supabase
     .from("disasters")
-    .select("id, title, location_name, tags, description")
+    .select("id, title, location_name, location, tags, description")
     .eq("id", disaster_id)
     .single();
 

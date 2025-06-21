@@ -29,16 +29,15 @@ const createResource = async (req, res) => {
 const getNearbyResources = async (req, res) => {
   try {
     const { id: disaster_id } = req.params;
-    const { lat, lon } = req.query;
+    const { geometry } = req.query; 
 
-    if (!lat || !lon) {
-      return res.status(400).json({ error: "lat and lon required" });
+    if (!geometry) {
+      return res.status(400).json({ error: "geometry parameter required" });
     }
 
     const { data, error } = await supabase.rpc("get_resources_nearby", {
       disaster: disaster_id,
-      lat: parseFloat(lat),
-      lon: parseFloat(lon),
+      point_geometry: geometry,
     });
 
     if (error) throw new Error(error.message);

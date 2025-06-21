@@ -1,3 +1,4 @@
+const { getCachedDisasterById } = require("../utils/disasterFetcher");
 const { getLocationFromDescription } = require("../utils/geocode");
 const supabase = require("../utils/supabase");
 
@@ -113,6 +114,18 @@ const deleteDisaster = async (req, res) => {
   }
 };
 
+const getDisasterById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { source, disaster } = await getCachedDisasterById(id);
+    return res.status(200).json({ source, ...disaster });
+  } catch (err) {
+    console.error("getDisasterById error:", err.message);
+    return res.status(404).json({ error: "Disaster not found" });
+  }
+};
+
 const getReportsForDisaster = async (req, res) => {
   const disaster_id = req.params.id;
 
@@ -137,5 +150,6 @@ module.exports = {
   getDisasters,
   updateDisaster,
   deleteDisaster,
+  getDisasterById,
   getReportsForDisaster
 };
