@@ -1,6 +1,5 @@
 const axios = require("axios");
 const supabase = require("./supabase");
-const { readFile } = require("fs/promises");
 
 const CACHE_TTL = 60 * 60 * 1000;
 const generateCacheKey = (url, title) => `verify:${title}:${url}`;
@@ -13,7 +12,12 @@ const downloadImageAsBase64 = async (url) => {
 };
 
 const analyzeImageWithGemini = async (imageUrl, disasterTitle) => {
-  const prompt = `This image was submitted as evidence of a disaster titled "${disasterTitle}". Analyze whether this image is related to that disaster. Is it authentic? Is it manipulated? Reply briefly with YES or NO and a reason.`;
+  const prompt = `This image was submitted as evidence of a disaster titled "${disasterTitle}". 
+  Analyze whether this image is truly related to the disaster. Is it authentic? 
+  Respond in this format: 
+  YES, followed by a short reason if it is genuine.
+  NO, followed by a short reason if it is fake or unrelated.
+  Example: YES, this image shows flooding in the mentioned location.`;
 
   const cacheKey = generateCacheKey(imageUrl, disasterTitle);
   const { data: cached } = await supabase
@@ -52,16 +56,28 @@ const analyzeImageWithGemini = async (imageUrl, disasterTitle) => {
       }
     );
 
-    const output =
-      response.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "No result";
+    const raw = response.data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "Unknown";
+
+    let is_authentic = null;
+    let reason = raw;
+
+    if (/^yes[,:\s]/i.test(raw)) {
+      is_authentic = true;
+      reason = raw.replace(/^yes[,:\s]*/i, "").trim();
+    } else if (/^no[,:\s]/i.test(raw)) {
+      is_authentic = false;
+      reason = raw.replace(/^no[,:\s]*/i, "").trim();
+    }
+
+    const result = { is_authentic, reason };
 
     await supabase.from("cache").upsert({
       key: cacheKey,
-      value: { response: output },
+      value: result,
       expires_at: new Date(Date.now() + CACHE_TTL).toISOString(),
     });
 
-    return { source: "live", result: { response: output } };
+    return { source: "live", result };
   } catch (err) {
     console.error("❌ Gemini API error:", err.response?.data || err.message);
     throw new Error("Gemini API request failed");

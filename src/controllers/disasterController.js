@@ -113,9 +113,29 @@ const deleteDisaster = async (req, res) => {
   }
 };
 
+const getReportsForDisaster = async (req, res) => {
+  const disaster_id = req.params.id;
+
+  try {
+    const { data, error } = await supabase
+      .from("reports")
+      .select("image_url, verification_status, created_at")
+      .eq("disaster_id", disaster_id)
+      .order("created_at", { ascending: false });
+
+    if (error) throw new Error(error.message);
+
+    return res.status(200).json(data);
+  } catch (err) {
+    console.error("getReportsForDisaster error:", err.message);
+    return res.status(500).json({ error: "Failed to fetch reports" });
+  }
+};
+
 module.exports = {
   createDisaster,
   getDisasters,
   updateDisaster,
   deleteDisaster,
+  getReportsForDisaster
 };

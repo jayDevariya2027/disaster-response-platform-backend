@@ -6,6 +6,7 @@ const {
   getDisasters,
   updateDisaster,
   deleteDisaster,
+  getReportsForDisaster,
 } = require("../controllers/disasterController");
 
 router.use(auth);
@@ -14,5 +15,6 @@ router.post("/", createDisaster);
 router.get("/", getDisasters);
 router.put("/:id", updateDisaster);
 router.delete("/:id", deleteDisaster);
+router.get("/:id/reports", getReportsForDisaster);
 
 module.exports = router;
