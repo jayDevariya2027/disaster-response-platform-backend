@@ -1,3 +1,4 @@
+const { getCachedDisasterById } = require("../utils/disasterFetcher");
 const { socialMockPosts } = require("../utils/socialMock");
 const supabase = require("../utils/supabase");
 
@@ -18,27 +19,19 @@ const getDisasterSocialMedia = async (req, res) => {
             .single();
 
         if (cached) {
-            const now = Date.now();
+        const now = Date.now();
             const expiresAt = new Date(cached.expires_at).getTime();
 
             if (expiresAt > now) {
-                console.log("✅ Returning cached data for disaster social media");
+            console.log("✅ Returning cached data for disaster social media");
                 return res
                     .status(200)
                     .json({ source: "cache", posts: cached.value });
             }
         }
 
-        // 2. Fetch disaster (location_name & tags)
-        const { data: disaster, error: disasterError } = await supabase
-            .from("disasters")
-            .select("location_name, tags")
-            .eq("id", disaster_id)
-            .single();
-
-        if (disasterError || !disaster)
-            return res.status(404).json({ error: "Disaster not found" });
-
+        // 2. Get cached disaster details
+        const { disaster } = await getCachedDisasterById(disaster_id);
         const { location_name, tags = [] } = disaster;
 
         // 3. Prepare tag + location keyword matching

@@ -34,7 +34,7 @@ const geocodeRoutes = require("./src/routes/geocodeRoutes");
 const resourceRoutes = require("./src/routes/resourceRoutes");
 const socialMediaRoutes = require("./src/routes/socialMediaRoutes")
 const officialUpdateRoutes = require("./src/routes/officialUpdateRoutes");
-
+const imageVerifyRoutes = require("./src/routes/imageVerifyRoutes");
 
 
 // Routes
@@ -44,6 +44,7 @@ app.use("/geocode", geocodeRoutes);
 app.use("/resources", resourceRoutes);
 app.use("/social", socialMediaRoutes);
 app.use("/updates", officialUpdateRoutes);
+app.use("/verification", imageVerifyRoutes);
 
 
 const startApp = async () => {
