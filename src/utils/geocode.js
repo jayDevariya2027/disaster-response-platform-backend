@@ -75,10 +75,16 @@ const getLocationFromDescription = async (description) => {
     .single();
 
   if (cached) {
-    return {
-      location_name: cached.value.location_name,
-      location: `SRID=4326;POINT(${cached.value.coordinates.lng} ${cached.value.coordinates.lat})`,
-    };
+    const now = Date.now();
+    const expiresAt = new Date(cached.expires_at).getTime();
+
+    if (expiresAt > now) {
+      console.log("returning cached data for get location from description ...")
+      return {
+        location_name: cached.value.location_name,
+        location: `SRID=4326;POINT(${cached.value.coordinates.lng} ${cached.value.coordinates.lat})`,
+      };
+    }
   }
 
   let location_name, coordinates;

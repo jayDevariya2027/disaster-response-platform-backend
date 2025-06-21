@@ -32,6 +32,7 @@ const initializeSocketIO = (server) => {
 const disasterRoutes = require("./src/routes/disasterRoutes");
 const geocodeRoutes = require("./src/routes/geocodeRoutes");
 const resourceRoutes = require("./src/routes/resourceRoutes");
+const socialMediaRoutes = require("./src/routes/socialMediaRoutes")
 
 
 // Routes
@@ -39,6 +40,8 @@ app.get("/", (req, res) => res.send("Disaster Response API is live"));
 app.use("/disasters", disasterRoutes);
 app.use("/geocode", geocodeRoutes);
 app.use("/resources", resourceRoutes);
+app.use("/social", socialMediaRoutes);
+
 
 const startApp = async () => {
   const server = http.createServer(app);
