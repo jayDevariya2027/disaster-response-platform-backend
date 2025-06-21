@@ -1,0 +1,57 @@
+const supabase = require("../utils/supabase");
+
+const createResource = async (req, res) => {
+  try {
+    const { disaster_id, name, location_name, lat, lng, type } = req.body;
+
+    if (!disaster_id || !name || !lat || !lng || !type) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const location = `SRID=4326;POINT(${lng} ${lat})`;
+
+    const { data, error } = await supabase
+      .from("resources")
+      .insert([{ disaster_id, name, location_name, location, type }])
+      .select("*");
+
+    if (error) throw new Error(error.message);
+
+    console.log(`✅ Resource mapped: ${type} at ${location_name}`);
+
+    res.status(201).json(data[0]);
+  } catch (err) {
+    console.error("createResource error:", err.message);
+    res.status(500).json({ error: "Failed to create resource" });
+  }
+};
+
+const getNearbyResources = async (req, res) => {
+  try {
+    const { id: disaster_id } = req.params;
+    const { lat, lon } = req.query;
+
+    if (!lat || !lon) {
+      return res.status(400).json({ error: "lat and lon required" });
+    }
+
+    const { data, error } = await supabase.rpc("get_resources_nearby", {
+      disaster: disaster_id,
+      lat: parseFloat(lat),
+      lon: parseFloat(lon),
+    });
+
+    if (error) throw new Error(error.message);
+
+    res.status(200).json(data);
+  } catch (err) {
+    console.error("getNearbyResources error:", err.message);
+    res.status(500).json({ error: "Failed to fetch nearby resources" });
+  }
+};
+
+
+module.exports = {
+  createResource,
+  getNearbyResources,
+};
